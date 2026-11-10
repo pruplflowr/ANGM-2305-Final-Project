@@ -16,7 +16,7 @@ This is a narrative game with multiple branching paths and endings. Similar to a
     through if statements. For example, if the user chose 1, outcome A will happen. If the user
     typed 2, outcome B will happen.
 - Accompanying visuals
-  - To help present the story, images will be 
+  - To help present the story, images will be used. They will be blitted on a surface using pygame. If time allows, the text and button formatting will also be changed to better fit the images used.
 
 ## Challenges
 - Branching narrative: I will need to plan out all the possible choices and endings before I start coding the game. I am planning to use Twine for this. It will be my first time using it, but it is a tool used specifically for this genre of writing.
