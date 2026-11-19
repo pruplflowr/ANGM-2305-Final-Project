@@ -18,28 +18,32 @@ class Scene:
 story_states = {
     "start": {
         "text": "This is the starting scene.",
-        "options": ["Option 1", "Option 2"],
-        "next_states": ["option_1", "option_2"]
+        "options": ["Go left", "Go right"],
+        "next_states": ["start_goleft", "start_goright"],
+        "background": "scene1"
     },
-    "option_1": {
-        "text": "This is the text for option 1.",
-        "options": [],
-        "next_states": []
+    "start_goleft": {
+        "text": "You have chosen to go left!",
+        "options": ["Look to the left", "Look to the right"],
+        "next_states": ["goleft_lookleft", "goleft_lookright"],
+        "background": "scene1"
     },
-    "option_2": {
-        "text": "This is the text for option 2.\nThis is testing a newline.\nAnd another.",
-        "options": ["Option 1", "Option 2"],
-        "next_states": []
+    "start_goright": {
+        "text": "You have chosen to go right!\nThis is a bonus message!",
+        "options": ["Look to the left", "Look to the right"],
+        "next_states": ["goright_lookleft", "goright_lookright"],
+        "background": "scene2"
     }
 }
 
-def display_story(state):
-    scene1 = Scene("test_background1.jpg")
-    scene2 = Scene("test_background2.jpg")
-    scene = scene1
-    font = pygame.font.SysFont('Cambria Math', 24)
-    scene.draw(screen)
+backgrounds = {
+    "scene1": Scene("test_background1.jpg"),
+    "scene2": Scene("test_background2.jpg")
+}
 
+def display_story(state):
+    # screen.fill('Black')
+    font = pygame.font.SysFont('Cambria Math', 24)
     text = font.render(story_states[state]["text"], True, 'White')
     screen.blit(text, (50, 50))
 
@@ -51,48 +55,42 @@ def display_story(state):
 
     pygame.display.flip()
 
-def handle_input(current_state, story_states):
-    options = story_states[current_state]["options"]
-    next_states = story_states[current_state]["next_states"]
-
-    selected_index = 0
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    selected_index = 0
-                elif event.key == pygame.K_RIGHT:
-                    selected_index = 1
-                elif event.key == pygame.K_RETURN:
-                    return update_story(selected_index, story_states, current_state)
-
-        display_story(current_state)
-
 def update_story(choice, story_states, current_state):
     state_info = story_states[current_state]
-
     if state_info["options"]:
         next_state = state_info["next_states"][choice]
+        background = backgrounds[state_info["background"]]
         print(f"Player chose option {choice + 1}: {state_info['options'][choice]}")
-        return next_state
+        return(next_state, background)
     else:
         print("No further choices available.")
         return current_state
 
 def main():
     running = True
+    selected_index = 0
+    current_state = "start"
+    background = backgrounds["scene1"]
+    
     while running:
         for event in pygame.event.get():
+            options = story_states[current_state]["options"]
+            next_states = story_states[current_state]["next_states"]
             if event.type == pygame.QUIT:
                 running = False
-            current_state = "start"
-            while True:
-                current_state = handle_input(current_state, story_states) # Displays the story
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    selected_index = 0
+                elif event.key == pygame.K_RIGHT:
+                    selected_index = 1
+                elif event.key == pygame.K_RETURN:
+                    current_state = next_states[selected_index]
+                    update_story(selected_index, story_states, current_state)
+        background.draw(screen)
+        display_story(current_state)
+        pygame.display.flip()
         clock.tick(60)
+
     pygame.quit()
 
 if __name__ == "__main__":
