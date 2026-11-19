@@ -85,7 +85,8 @@ def main():
                     selected_index = 1
                 elif event.key == pygame.K_RETURN:
                     current_state = next_states[selected_index]
-                    update_story(selected_index, story_states, current_state)
+                    new_background = update_story(selected_index, story_states, current_state)
+                    background = new_background[1]
         background.draw(screen)
         display_story(current_state)
         pygame.display.flip()
