@@ -5,7 +5,6 @@ pygame.init()
 pygame.font.init()
 pygame.display.set_caption("A Night in Alderhall Manor")
 clock = pygame.time.Clock()
-font = pygame.font.SysFont('Cambria Math', 16)
 resolution = (800, 600) 
 screen = pygame.display.set_mode(resolution)
 
@@ -16,45 +15,73 @@ class Scene:
     def draw(self, screen):
         screen.blit(self.background, (0, 0))
 
-def show_text(text, x, y, font, color='Black'):
-    lines = text.split('\n')
-    y_offset = 0
+story_states = {
+    "start": {
+        "text": "This is the starting scene.",
+        "options": ["Option 1", "Option 2"],
+        "next_states": ["option_1", "option_2"]
+    },
+    "option_1": {
+        "text": "This is the text for option 1.",
+        "options": [],
+        "next_states": []
+    },
+    "option_2": {
+        "text": "This is the text for option 2.\nThis is testing a newline.\nAnd another.",
+        "options": ["Option 1", "Option 2"],
+        "next_states": []
+    }
+}
 
-    for line in lines:
-        text_surface = font.render(line, True, color)
-        screen.blit(text_surface, (x, y + y_offset))
-        y_offset += text_surface.get_height()
+def display_story(state):
+    scene1 = Scene("test_background1.jpg")
+    scene2 = Scene("test_background2.jpg")
+    scene = scene1
+    font = pygame.font.SysFont('Cambria Math', 24)
+    scene.draw(screen)
 
-def show_dialogue(dialogue_list, font, color='Black'):
-    index = 0
-    while index < len(dialogue_list):
-        show_text_box(50)
-        show_text(dialogue_list[index], 25, resolution[1] - 100, font, color)
-        pygame.display.flip()
+    text = font.render(story_states[state]["text"], True, 'White')
+    screen.blit(text, (50, 50))
 
+    options = story_states[state]["options"]
+    y_offset = 150
+    for i, option in enumerate(options):
+        option_text = font.render(option, True, 'White')
+        screen.blit(option_text, (50, y_offset + i * 50))
+
+    pygame.display.flip()
+
+def handle_input(current_state, story_states):
+    options = story_states[current_state]["options"]
+    next_states = story_states[current_state]["next_states"]
+
+    selected_index = 0
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE or pygame.K_GREATER:
-                    index += 1
-                    break
+                if event.key == pygame.K_LEFT:
+                    selected_index = 0
+                elif event.key == pygame.K_RIGHT:
+                    selected_index = 1
+                elif event.key == pygame.K_RETURN:
+                    return update_story(selected_index, story_states, current_state)
 
-def show_text_box(y_offset, width=resolution[0]-40, height=55, color='White'):
-    pygame.draw.rect(screen, color, pygame.Rect(20, resolution[1] - y_offset - height, width, height))
+        display_story(current_state)
 
-# The game's full story
-story = [
-    "This is a short line of text.",
-    "This is a longer line of text, which may have to appear as two lines on the dialogue box.",
-    "This is an even longer line of text. This the maximum of how long of a text one dialogue box should contain.\nThis is testing a new line."
-    ]
+def update_story(choice, story_states, current_state):
+    state_info = story_states[current_state]
 
-# Initializing background images
-scene1 = Scene("test_background1.jpg")
-scene2 = Scene("test_background2.jpg")
-scene = scene1
+    if state_info["options"]:
+        next_state = state_info["next_states"][choice]
+        print(f"Player chose option {choice + 1}: {state_info['options'][choice]}")
+        return next_state
+    else:
+        print("No further choices available.")
+        return current_state
 
 def main():
     running = True
@@ -62,10 +89,10 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            scene.draw(screen)
-            pygame.display.flip()
+            current_state = "start"
+            while True:
+                current_state = handle_input(current_state, story_states) # Displays the story
         clock.tick(60)
-        show_dialogue(story, font, 'Black')
     pygame.quit()
 
 if __name__ == "__main__":
